@@ -1,11 +1,14 @@
 from django.db import models
 from django.template.defaultfilters import filesizeformat
+
+import os
 import subprocess
 import datetime
 
+
 class Upload(models.Model):
     '''A file that got uploaded.'''
-    def detect_mime(filepath):
+    def detect_mime(self, filepath):
         """detect mime using system  program"""
         proc = subprocess.Popen(['file', '--mime-type', '-b', filepath],
             stdout=subprocess.PIPE)
@@ -13,6 +16,7 @@ class Upload(models.Model):
         return out[0].strip()
 
     file = models.FileField(upload_to="media/uploads")
+    size = models.PositiveIntegerField(blank=True, default=0)
     timestamp = models.DateTimeField(default=datetime.datetime.now)
     name = models.CharField('real file name', max_length=255)
     timestamp = models.DateTimeField(default=datetime.datetime.now)
@@ -25,11 +29,17 @@ class Upload(models.Model):
     def __unicode__(self):
         return u"%s" % (self.file)
 
-    def save(self, *args, **kvargs):
+    def set_file(self, fl):
+        self.name = os.path.basename(fl.name)
+        print type(fl)
+        #self.size = fl.size
+        self.file = fl
+
+    def save(self, *args, **kwargs):
         if not self.id:
             self.set_file(self.file)
-        self.mime_type = detect_mime(self.file.path)
-        super(Attachment, self).save(*args, **kvargs)
+        self.mime_type = self.detect_mime(self.file.path)
+        super(Upload, self).save(*args, **kwargs)
 
     @property
     def size(self):

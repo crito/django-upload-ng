@@ -1,0 +1,14 @@
+<html>
+		<head>
+				<title>upload test</title>
+		</head>
+		<body>
+				<div id="upload_form">
+						<form action="/up/" method="post" enctype="multipart/form-data">
+								{% csrf_token %}
+								{{ form.as_p }}
+								<p><input type="submit" value="Upload!" /></p>
+						</form>
+				</div>
+		</body>
+</html>
